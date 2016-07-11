@@ -55,22 +55,25 @@ func main() {
 	//		fmt.Println("unable to resovle dns for server address", "www.waterfrontech.com")
 	//		os.Exit(6)
 	//	}
-	var serverAdr string
-	if clientConfig.ServerAddr != nil {
-		serverAdr := clientConfig.ServerAddr
-	} else {
-		fmt.Println("unable get server address")
-		os.Exit(6)
-	}
+	//	var serverAdr string
+	//	if clientConfig.ServerAddr != "" {
+	//		serverAdr := clientConfig.ServerAddr
+	//	} else {
+	//		fmt.Println("unable get server address")
+	//		os.Exit(6)
+	//	}
 
-	saddr, err := net.ResolveTCPAddr("tcp", serverAdr)
-	if err != nil {
-		fmt.Println("failed to resolve tcp address", serverAdr)
-	}
+	//	saddr, err := net.ResolveTCPAddr("tcp", serverAdr)
+	//	if err != nil {
+	//		fmt.Println("failed to resolve tcp address", serverAdr)
+	//	}
 
 	connid := 0
 	for {
 		conn, err := listener.AcceptTCP()
+		fmt.Println("remote addr:", conn.RemoteAddr().String())
+		fmt.Println("local addr:", conn.LocalAddr().String())
+
 		if err != nil {
 			fmt.Println("Failed to accept connection '%s'", err)
 			continue
@@ -78,7 +81,13 @@ func main() {
 		connid++
 		fmt.Println("connection:", connid, " connect to", raddr.String())
 		var p = tcpproxy.New(conn, laddr, raddr)
-
+		p.Log = tcpproxy.ColorLogger{
+			Verbose:     true,
+			VeryVerbose: true,
+			Prefix:      fmt.Sprintf("Connection #%03d ", connid),
+			Color:       true,
+		}
+		p.OutputHex = true
 		p.Nagles = true
 
 		go p.Start()
@@ -88,12 +97,12 @@ func main() {
 	//tcpproxy.NewTLSUnwrapped()
 }
 
-func CreateNewProxy(conn *net.TCPConn, raddr *net.TCPAddr) error {
-	//1. connect to server
-	//2. tell server my name
-	//3. server make a table, you name
-	//4. client connect to server:8080,
-	//5. client how to connect to the real server?.
+//func CreateNewProxy(conn *net.TCPConn, raddr *net.TCPAddr) error {
+//	//1. connect to server
+//	//2. tell server my name
+//	//3. server make a table, you name
+//	//4. client connect to server:8080,
+//	//5. client how to connect to the real server?.
 
-	//TODO
-}
+//	//TODO
+//}
